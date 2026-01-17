@@ -11,6 +11,7 @@ module cpu (
 
   always @(posedge clk or posedge rst) begin
     if (rst) pc <= 32'b0;
+    else if (take_branch) pc <= pc + imm_b;
     else     pc <= pc + 4;
   end
 
@@ -34,6 +35,9 @@ module cpu (
   *
   * I-type:  <--- [31:20]imm[11:0] --->| [19:15]rs1 | [14:12]funct3 | [11:7]rd | [6:0]opcode
   * ( 1 reg + 12-bit imm:  rd = rs1 op imm)
+  *
+  * B-type: [31:25]imm[12|10:5] | [24:20]rs2 | [19:15]rs1 | [14:12]funct3 | [11:7]imm[4:1|11] | [6:0]opcode
+  * (branch: no rd, imm split, LSB is always zero)
   */
 
   wire [6:0] opcode = instruction[6:0];
@@ -44,6 +48,9 @@ module cpu (
   wire [4:0] rs2    = instruction[24:20];
 
   wire [31:0] imm_i = {{20{instruction[31]}}, instruction[31:20]}; // I-type immediate
+
+  wire [31:0] imm_b = {{19{instruction[31]}}, instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0}; // B-type immediate (sign-extended)
+  wire take_branch = (opcode == 7'b1100011) && (funct3 == 3'b000) && (rf_data1 == rf_data2);
 
   reg  [3:0] alu_op;
   always @(*) begin
@@ -59,6 +66,7 @@ module cpu (
           default:         alu_op = 4'b1111;     // NOP/Unknown
         endcase
       end
+
       7'b0010011: begin // I-type instructions
         case (funct3)
           3'b000:  alu_op = 4'b0000;     // ADDI
@@ -68,6 +76,11 @@ module cpu (
           default: alu_op = 4'b1111;     // NOP/Unknown
         endcase
       end
+
+      7'b1100011: begin // B-type instructions (for branch comparison)
+        alu_op = 4'b0001;                 // SUB for comparison
+      end
+
       default: alu_op = 4'b1111;         // NOP/Unknown
     endcase
   end
@@ -108,7 +121,7 @@ module cpu (
     if (rst) begin
       for (i = 0; i < 32; i = i + 1) rf[i] <= 32'b0;
     end else begin
-      if ((opcode == 7'b0110011 || opcode == 7'b0010011) && rd != 5'b0) begin // R-type and I-type write back
+      if ((opcode == 7'b0110011 || opcode == 7'b0010011) && rd != 5'b0) begin
         rf[rd] <= alu_out;
       end
     end

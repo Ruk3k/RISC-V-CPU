@@ -32,35 +32,56 @@ int main(int argc, char** argv) {
     top->clk = 0;
     tick(top, tfp, main_time);
 
-    std::cout << "Starting CPU Debug Simulation..." << std::endl;
-    std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << " Cycle |     PC     | Reg |  Value (Hex)  | Value (Dec)" << std::endl;
-    std::cout << "-------|------------|-----|---------------|------------" << std::endl;
+    std::cout << std::endl << "Starting CPU Debug Simulation (B-type Branch Test)..." << std::endl;
+    std::cout << "===============================================================================================================================" << std::endl;
+    std::cout << " Cycle |     PC     | Instruction | Branch? |                                 Register Updates                                 " << std::endl;
+    std::cout << "-------|------------|-------------|---------|----------------------------------------------------------------------------------" << std::endl;
 
-    for (int cycle = 0; cycle < 9; cycle++) {
+    uint32_t prev_pc = 0;
+    uint32_t prev_instruction = 0;
+    for (int cycle = 0; cycle < 11; cycle++) {
         top->clk = 1;
         tick(top, tfp, main_time);
 
         auto& rf = top->cpu->rf;
         uint32_t pc_val = top->cpu->__PVT__pc;
+        uint32_t instruction = top->cpu->__PVT__instruction;
+        uint8_t opcode = instruction & 0x7F;
+        uint8_t prev_opcode = prev_instruction & 0x7F;
 
-        std::cout << "  " << std::setw(2) << std::setfill(' ') << cycle << "   | "
-                  << "0x" << std::setw(8) << std::hex << std::setfill('0') << pc_val << " | ";
+        // Check if branch was taken (based on PREVIOUS instruction)
+        bool branch_taken = (prev_pc != 0) && (pc_val != prev_pc + 4);
+        std::string branch_str = (prev_opcode == 0x63) ? (branch_taken ? " TAKEN " : "NOT_TKN") : "   -   ";
 
-        int target_reg = (cycle + 1);
+        std::cout << "  " << std::setw(2) << std::setfill(' ') << std::dec << cycle << "   | "
+                  << "0x" << std::setw(8) << std::hex << std::setfill('0') << pc_val << " | "
+                  << " 0x" << std::setw(8) << std::hex << std::setfill('0') << instruction << " | "
+                  << std::setw(7) << std::setfill(' ') << branch_str << " | ";
 
-        std::cout << " x" << std::dec << target_reg << " | "
-                  << "  0x" << std::setw(8) << std::hex << std::setfill('0') << rf[target_reg] << "  | "
-                  << std::setw(6) << std::dec << std::setfill(' ') << static_cast<int32_t>(rf[target_reg]) << std::endl;
+        // Show registers that changed
+        std::cout << "x1=" << std::dec << std::setw(3) << static_cast<int32_t>(rf[1]) << " | "
+                  << "x2=" << std::setw(3) << static_cast<int32_t>(rf[2]) << " | "
+                  << "x3=" << std::setw(3) << static_cast<int32_t>(rf[3]) << " | "
+                  << "x4=" << std::setw(3) << static_cast<int32_t>(rf[4]) << " | "
+                  << "x5=" << std::setw(3) << static_cast<int32_t>(rf[5]) << " | "
+                  << "x6=" << std::setw(3) << static_cast<int32_t>(rf[6]) << " | "
+                  << "x7=" << std::setw(3) << static_cast<int32_t>(rf[7]) << " | "
+                  << "x8=" << std::setw(3) << static_cast<int32_t>(rf[8]) << " | "
+                  << "x9=" << std::setw(3) << static_cast<int32_t>(rf[9]) << " | "
+                  << std::endl;
 
+        prev_pc = pc_val;
+        prev_instruction = instruction;
         top->clk = 0;
         tick(top, tfp, main_time);
     }
 
+    std::cout << "===============================================================================================================================" << std::endl;
+
     tfp->close();
     delete top;
-    std::cout << "-------------------------------------------------------" << std::endl;
-    std::cout << "Debug finished. Waves saved to waveform.vcd" << std::endl;
+
+    std::cout << "Debug finished. Waves saved to waveform.vcd" << std::endl << std::endl;
 
     return 0;
 }

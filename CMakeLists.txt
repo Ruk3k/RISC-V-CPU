@@ -7,14 +7,14 @@ find_package(Verilator REQUIRED)
 add_executable(assembler src/assembler.cpp)
 
 add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/src/program.hex
+    OUTPUT ${CMAKE_SOURCE_DIR}/src/program.hex
     COMMAND assembler
     DEPENDS assembler ${CMAKE_SOURCE_DIR}/src/program.asm
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src
     COMMENT "Assembling program.asm into program.hex..."
 )
 
-add_custom_target(generate_hex ALL DEPENDS ${CMAKE_BINARY_DIR}/src/program.hex)
+add_custom_target(generate_hex ALL DEPENDS ${CMAKE_SOURCE_DIR}/src/program.hex)
 
 add_executable(Vcpu
     src/sim_main.cpp
