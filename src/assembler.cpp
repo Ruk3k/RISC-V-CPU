@@ -15,7 +15,14 @@ struct InstInfo {
 };
 
 uint32_t parseReg(const std::string& reg) {
-    return std::stoi(reg.substr(1));
+    if (reg.empty() || reg[0] != 'x') {
+        throw std::invalid_argument("Invalid register format: " + reg);
+    }
+    try {
+        return std::stoi(reg.substr(1));
+    } catch (const std::exception& e) {
+        throw std::invalid_argument("Failed to parse register " + reg + ": " + e.what());
+    }
 }
 
 int main() {
@@ -42,36 +49,48 @@ int main() {
 
     while (std::getline(infile, line)) {
         if (line.empty() || line.find("//") == 0) continue;
+
         for (char &c : line) if (c == ',') c = ' ';
 
         std::stringstream ss(line);
         std::string mnemonic, rd_s, rs1_s, rs2_or_imm_s;
         ss >> mnemonic >> rd_s >> rs1_s >> rs2_or_imm_s;
 
-        if(instMap.find(mnemonic) == instMap.end()) continue;
+        if (mnemonic.empty()) continue;
 
-        InstInfo info = instMap[mnemonic];
-        uint32_t instruction = 0;
-        uint32_t rd = parseReg(rd_s);
-        uint32_t rs1 = parseReg(rs1_s);
-
-        if (info.type == "R") {
-            // R-type: [funct7][rs2][rs1][funct3][rd][opcode]
-            uint32_t rs2 = parseReg(rs2_or_imm_s);
-            instruction = (static_cast<uint32_t>(info.funct7) << 25) |
-                          (rs2 << 20) | (rs1 << 15) |
-                          (static_cast<uint32_t>(info.funct3) << 12) |
-                          (rd << 7) | info.opcode;
-        } else if (info.type == "I") {
-            // I-type: [imm][rs1][funct3][rd][opcode]
-            int32_t imm = std::stoi(rs2_or_imm_s);
-            uint32_t imm_u = static_cast<uint32_t>(imm) & 0xFFF;
-            instruction = (imm_u << 20) | (rs1 << 15) |
-                          (static_cast<uint32_t>(info.funct3) << 12) |
-                          (rd << 7) | info.opcode;
+        if(instMap.find(mnemonic) == instMap.end()) {
+            std::cerr << "Warning: Unknown instruction " << mnemonic << std::endl;
+            continue;
         }
 
-        outfile << std::setfill('0') << std::setw(8) << std::hex << instruction << std::endl;
+        try {
+            InstInfo info = instMap[mnemonic];
+            uint32_t instruction = 0;
+            uint32_t rd = parseReg(rd_s);
+            uint32_t rs1 = parseReg(rs1_s);
+
+            if (info.type == "R") {
+                // R-type: [funct7][rs2][rs1][funct3][rd][opcode]
+                uint32_t rs2 = parseReg(rs2_or_imm_s);
+                instruction = (static_cast<uint32_t>(info.funct7) << 25) |
+                              (rs2 << 20) | (rs1 << 15) |
+                              (static_cast<uint32_t>(info.funct3) << 12) |
+                              (rd << 7) | info.opcode;
+            } else if (info.type == "I") {
+                // I-type: [imm][rs1][funct3][rd][opcode]
+                int32_t imm = std::stoi(rs2_or_imm_s);
+                uint32_t imm_u = static_cast<uint32_t>(imm) & 0xFFF;
+                instruction = (imm_u << 20) | (rs1 << 15) |
+                              (static_cast<uint32_t>(info.funct3) << 12) |
+                              (rd << 7) | info.opcode;
+            }
+
+            outfile << std::setfill('0') << std::setw(8) << std::hex << instruction << std::endl;
+        } catch (const std::exception& e) {
+            std::cerr << "Error parsing line: " << line << std::endl;
+            std::cerr << "Exception: " << e.what() << std::endl;
+            return 1;
+        }
     }
 
     std::cout << "Assembly complete. Generated program.hex" << std::endl;

@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
     std::cout << " Cycle |     PC     | Reg |  Value (Hex)  | Value (Dec)" << std::endl;
     std::cout << "-------|------------|-----|---------------|------------" << std::endl;
 
-    for (int cycle = 0; cycle < 10; cycle++) {
+    for (int cycle = 0; cycle < 9; cycle++) {
         top->clk = 1;
         tick(top, tfp, main_time);
 
@@ -47,8 +47,7 @@ int main(int argc, char** argv) {
         std::cout << "  " << std::setw(2) << std::setfill(' ') << cycle << "   | "
                   << "0x" << std::setw(8) << std::hex << std::setfill('0') << pc_val << " | ";
 
-        int target_reg = (cycle < 6) ? (cycle + 1) : 0;
-        if (cycle == 5) target_reg = 0;
+        int target_reg = (cycle + 1);
 
         std::cout << " x" << std::dec << target_reg << " | "
                   << "  0x" << std::setw(8) << std::hex << std::setfill('0') << rf[target_reg] << "  | "
