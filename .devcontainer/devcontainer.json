@@ -1,0 +1,21 @@
+{
+    "name": "RISK-V CPU Dev Env",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "mcu-debug.rtos-views",
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-extension-pack",
+                "ms-vscode.cmake-tools",
+                "ms-vscode.makefile-tools",
+                "ms-vscode.hexeditor",
+                "mshr-h.verilog-hdl-support",
+                "github.copilot"
+            ]
+        }
+    },
+    "remoteUser": "root"
+}

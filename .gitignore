@@ -1,0 +1,36 @@
+# --- ビルド成果物 (C++ / Verilator) ---
+# Verilatorが生成する中間ファイル群
+obj_dir/
+# CMakeが生成するビルドディレクトリ
+build/
+
+# --- 実行ファイル ---
+# 直接コマンドでビルドした場合の成果物
+Vcpu
+*.o
+*.d
+*.a
+
+# --- ハードウェア開発関連 (GTKWave等) ---
+# シミュレーションの結果出力される波形データ（非常に巨大になります）
+*.vcd
+*.fst
+*.ghw
+
+# --- エディタ・IDE関連 (VS Code) ---
+# 個人のエディタ設定（共有不要なもの）
+.vscode/
+# ※ もし launch.json や tasks.json を共有したい場合は、以下のように除外を解除します
+# !.vscode/launch.json
+# !.vscode/tasks.json
+
+# --- OS・システム一時ファイル ---
+.DS_Store
+Thumbs.db
+*~
+*.swp
+
+# --- その他 ---
+# Python等を使う場合の仮想環境やキャッシュ
+__pycache__/
+.venv/
