@@ -15,10 +15,12 @@ module decoder (
 
   // デコード（パース）部分
   always_comb begin
+
     // デフォルト値の設定
     ctrl.alu_op     = ALU_NOP;
     ctrl.src_a_sel  = SRC_A_RS1;
     ctrl.src_b_sel  = SRC_B_RS2;
+    ctrl.imm_type   = IMM_I;
     ctrl.reg_write  = WRITE_DISABLE;
 
     // opcode で制御信号を指定
@@ -27,6 +29,7 @@ module decoder (
         ctrl.src_a_sel = SRC_A_RS1;
         ctrl.src_b_sel = SRC_B_RS2;
         ctrl.reg_write = WRITE_ENABLE; // レジスタ書き込み有効化
+
         case({funct7, funct3}) // funct7 と funct3 で命令を判別
           10'b0000000_000: ctrl.alu_op = ALU_ADD; // ADD
           10'b0100000_000: ctrl.alu_op = ALU_SUB; // SUB
@@ -40,7 +43,9 @@ module decoder (
       OPCODE_OP_IMM: begin
         ctrl.src_a_sel = SRC_A_RS1;
         ctrl.src_b_sel = SRC_B_IMM;
+        ctrl.imm_type  = IMM_I;        // 即値の種類を指定
         ctrl.reg_write = WRITE_ENABLE; // レジスタ書き込み有効化
+
         case(funct3) // funct3 で命令を判別
           3'b000:  ctrl.alu_op = ALU_ADD; // ADDI
           3'b111:  ctrl.alu_op = ALU_AND; // ANDI

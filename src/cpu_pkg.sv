@@ -32,6 +32,11 @@ package cpu_pkg;
     SRC_B_IMM  // 即値
   } src_b_sel_t;
 
+  // 即値の種類
+  typedef enum logic [2:0] {
+    IMM_I, IMM_S, IMM_B, IMM_U, IMM_J
+  } imm_type_t;
+
   // レジスタ書き込み有効信号
   typedef enum logic {
     WRITE_DISABLE,
@@ -43,6 +48,7 @@ package cpu_pkg;
     alu_op_t    alu_op;    // ALU の演算種類
     src_a_sel_t src_a_sel; // ALU の入力 A
     src_b_sel_t src_b_sel; // ALU の入力 B
+    imm_type_t  imm_type;  // 即値の種類
     reg_write_t reg_write; // レジスタ書き込み有効信号
   } control_signals_t;
 endpackage
