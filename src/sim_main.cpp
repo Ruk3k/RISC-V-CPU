@@ -1,12 +1,12 @@
 #include <iostream>
 #include <iomanip>
 #include <verilated.h>
-#include <verilated_vcd_c.h>
+#include <verilated_fst_c.h>
 #include "Vcpu.h"
 
 const char* alu_op_names[] = {"ADD", "SUB", "AND", "OR", "XOR", "NOP"};
-const char* src_a_names[] = {"RS1"};
-const char* src_b_names[] = {"RS2", "IMM"};
+const char* src_a_names[]  = {"RS1"};
+const char* src_b_names[]  = {"RS2", "IMM"};
 
 int main(int argc, char** argv) {
     Verilated::commandArgs(argc, argv);
@@ -14,9 +14,9 @@ int main(int argc, char** argv) {
 
     // 波形出力設定
     Verilated::traceEverOn(true);
-    VerilatedVcdC* tfp = new VerilatedVcdC;
+    VerilatedFstC* tfp = new VerilatedFstC;
     top->trace(tfp, 99);
-    tfp->open("waveform.vcd");
+    tfp->open("waveform.fst");
 
     // 初期化
     uint64_t main_time = 0;
@@ -46,10 +46,10 @@ int main(int argc, char** argv) {
             // 命令が有効な場合のみ表示
             if (instr != 0) {
                 // デコード結果を取得
-                uint8_t alu_op = top->decoded_alu_op;
-                uint8_t src_a_sel = top->decoded_src_a_sel;
-                uint8_t src_b_sel = top->decoded_src_b_sel;
-                uint8_t reg_write = top->decoded_reg_write;
+                uint8_t alu_op = top->alu_op;
+                uint8_t src_a_sel = top->src_a_sel;
+                uint8_t src_b_sel = top->src_b_sel;
+                uint8_t reg_write = top->reg_write;
 
                 // 命令を解析して期待値を設定
                 uint8_t opcode = instr & 0x7F;

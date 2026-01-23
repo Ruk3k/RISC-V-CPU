@@ -23,20 +23,26 @@ package cpu_pkg;
 
   // ALU の入力 A の選択
   typedef enum logic [1:0] {
-    SRC_A_RS1  // レジスタ rs1
+    SRC_A_RS1 // レジスタ rs1
   } src_a_sel_t;
 
   // ALU の入力 B の選択
   typedef enum logic [1:0] {
-    SRC_B_RS2,  // レジスタ rs2
-    SRC_B_IMM   // 即値
+    SRC_B_RS2, // レジスタ rs2
+    SRC_B_IMM  // 即値
   } src_b_sel_t;
+
+  // レジスタ書き込み有効信号
+  typedef enum logic {
+    WRITE_DISABLE,
+    WRITE_ENABLE
+  } reg_write_t;
 
   // 制御信号をまとめた構造体
   typedef struct packed {
     alu_op_t    alu_op;    // ALU の演算種類
     src_a_sel_t src_a_sel; // ALU の入力 A
     src_b_sel_t src_b_sel; // ALU の入力 B
-    logic       reg_write; // レジスタ書き込み有効信号
+    reg_write_t reg_write; // レジスタ書き込み有効信号
   } control_signals_t;
 endpackage

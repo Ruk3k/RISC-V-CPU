@@ -19,9 +19,29 @@ verilate(Vcpu
         src/pc_reg.sv       # プログラムカウンタレジスタ
         src/cpu_top.sv      # トップモジュール
     TOP_MODULE cpu_top      # トップモジュール名
-    TRACE                   # 波形出力を有効化
+    TRACE_FST               # FST波形出力を有効化
     PREFIX Vcpu             # 生成されるC++クラスのプレフィックス
+    VERILATOR_ARGS -Wno-CASEINCOMPLETE  # case文の不完全性警告を無効化
 )
 
 # Verilatorが生成したヘッダファイルのパスを追加
 target_include_directories(Vcpu PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+# アセンブラの実行ファイルを生成
+add_executable(assembler
+    src/assembler.cpp
+)
+# program.asmからsrc/program.hexを生成するカスタムコマンド
+add_custom_command(
+    OUTPUT ${CMAKE_SOURCE_DIR}/src/program.hex
+    COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/src $<TARGET_FILE:assembler>
+    DEPENDS assembler ${CMAKE_SOURCE_DIR}/src/program.asm
+    COMMENT "Generating program.hex from program.asm"
+    VERBATIM
+)
+
+# Vcpuをビルドする前にprogram.hexを生成
+add_custom_target(generate_hex ALL
+    DEPENDS ${CMAKE_SOURCE_DIR}/src/program.hex
+)
+add_dependencies(Vcpu generate_hex)

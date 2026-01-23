@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     gtkwave \
     python3 \
     gcc-riscv64-unknown-elf \
+    zlib1g-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ENV LANG en_US.UTF-8

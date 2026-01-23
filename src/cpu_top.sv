@@ -4,11 +4,10 @@ module cpu_top (
   input  logic        clk,
   input  logic        rst_n,
   output logic [31:0] current_instr,
-  // デコード結果の出力（テスト用）
-  output logic [3:0]  decoded_alu_op,
-  output logic [1:0]  decoded_src_a_sel,
-  output logic [1:0]  decoded_src_b_sel,
-  output logic        decoded_reg_write
+  output alu_op_t     alu_op,
+  output src_a_sel_t  src_a_sel,
+  output src_b_sel_t  src_b_sel,
+  output reg_write_t  reg_write
 );
   logic [31:0] pc;
   logic [31:0] instr;
@@ -36,10 +35,10 @@ module cpu_top (
 // 現在の命令を出力（リセット時は NOP: 0x00000000）
   assign current_instr = rst_n ? instr : 32'h00000000;
 
-// デコード結果を出力
-  assign decoded_alu_op    = ctrl_signals.alu_op;
-  assign decoded_src_a_sel = ctrl_signals.src_a_sel;
-  assign decoded_src_b_sel = ctrl_signals.src_b_sel;
-  assign decoded_reg_write = ctrl_signals.reg_write;
+// デコード結果を出力（リセット時は NOP）
+  assign alu_op    = rst_n ? ctrl_signals.alu_op    : ALU_NOP;
+  assign src_a_sel = rst_n ? ctrl_signals.src_a_sel : SRC_A_RS1;
+  assign src_b_sel = rst_n ? ctrl_signals.src_b_sel : SRC_B_RS2;
+  assign reg_write = rst_n ? ctrl_signals.reg_write : WRITE_DISABLE;
 
 endmodule

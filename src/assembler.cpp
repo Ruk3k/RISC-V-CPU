@@ -52,6 +52,9 @@ int main() {
         // Skip empty lines
         if (line.empty()) continue;
 
+        // Save original line for comment
+        std::string original_line = line;
+
         // Remove inline comments
         size_t comment_pos = line.find("//");
         if (comment_pos != std::string::npos) {
@@ -60,6 +63,12 @@ int main() {
 
         // Skip lines that are now empty after comment removal
         if (line.find_first_not_of(" \t") == std::string::npos) continue;
+
+        // Trim the original line for cleaner comment
+        size_t start = original_line.find_first_not_of(" \t");
+        if (start != std::string::npos) {
+            original_line = original_line.substr(start);
+        }
 
         for (char &c : line) if (c == ',') c = ' ';
 
@@ -111,7 +120,8 @@ int main() {
                               (static_cast<uint32_t>(info.funct3) << 12) | (b11 << 7) | (b4_1 << 8) | info.opcode;
             }
 
-            outfile << std::setfill('0') << std::setw(8) << std::hex << instruction << std::endl;
+            outfile << std::setfill('0') << std::setw(8) << std::hex << instruction
+                    << "  // " << original_line << std::endl;
         } catch (const std::exception& e) {
             std::cerr << "Error parsing line: " << line << std::endl;
             std::cerr << "Exception: " << e.what() << std::endl;
