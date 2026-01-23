@@ -1,33 +1,25 @@
 cmake_minimum_required(VERSION 3.12)
-project(my_riskv_cpu)
+project(riscv_fetch_debug)
 
-cmake_policy(SET CMP0144 NEW)
+# Verilatorパッケージを検索
+cmake_policy(SET CMP0144 NEW) # 警告回避のため
 find_package(Verilator REQUIRED)
 
-add_executable(assembler src/assembler.cpp)
-
-add_custom_command(
-    OUTPUT ${CMAKE_SOURCE_DIR}/src/program.hex
-    COMMAND assembler
-    DEPENDS assembler ${CMAKE_SOURCE_DIR}/src/program.asm
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src
-    COMMENT "Assembling program.asm into program.hex..."
-)
-
-add_custom_target(generate_hex ALL DEPENDS ${CMAKE_SOURCE_DIR}/src/program.hex)
-
+# シミュレーション用プログラムから実行ファイルを生成
 add_executable(Vcpu
     src/sim_main.cpp
-    ${VERILATOR_ROOT}/include/verilated_vcd_c.cpp
 )
 
+# SystemVerilog ソースを Verilator で C++ に変換
 verilate(Vcpu
-    SOURCES src/cpu.v
-    TOP_MODULE cpu
-    TRACE
+    SOURCES
+        src/cpu_top.sv      # トップモジュール
+        src/instr_mem.sv    # 命令メモリ
+        src/pc_reg.sv       # プログラムカウンタレジスタ
+    TOP_MODULE cpu_top      # トップモジュール名
+    TRACE                   # 波形出力を有効化
+    PREFIX Vcpu             # 生成されるC++クラスのプレフィックス
 )
 
-# Ensure Vcpu depends on hex file generation
-add_dependencies(Vcpu generate_hex)
-
+# Verilatorが生成したヘッダファイルのパスを追加
 target_include_directories(Vcpu PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
