@@ -1,11 +1,14 @@
-addi  x1,  x0, 10      // x1 = 10
-addi  x2,  x0, 10      // x2 = 10
-addi  x3,  x0, 10      // x3 = 10
-beq   x1,  x2, 12      // Skip 2 instruction
-addi  x4,  x0, 99      // x4 = 99 (should be skipped)
-addi  x5,  x0, 88      // x5 = 88 (should be skipped)
-addi  x6,  x0, 20      // x6 = 20 (branch target)
-addi  x7,  x0, 30      // x7 = 30
-beq   x1,  x3, 8       // skip 1 instruction
-addi  x8,  x0, 40      // x8 = 40 (should be skipped)
-addi  x9,  x0, 50      // x9 = 50 (branch target)
+// I 形式命令のテスト（OP-IMM）
+addi  x1,  x0, 10      // Test ADDI: x1 = 0 + 10 = 10
+addi  x2,  x0, 20      // Test ADDI: x2 = 0 + 20 = 20
+addi  x3,  x0, -5      // Test ADDI: x3 = 0 + (-5) = -5
+andi  x4,  x1, 15      // Test ANDI: x4 = 10 & 15 = 10
+ori   x5,  x2, 5       // Test ORI:  x5 = 20 | 5 = 21
+xori  x6,  x1, 3       // Test XORI: x6 = 10 ^ 3 = 9
+
+// R 形式命令のテスト（OP）
+add   x7,  x1,  x2     // Test ADD: x7 = 10 + 20 = 30
+sub   x8,  x2,  x1     // Test SUB: x8 = 20 - 10 = 10
+and   x9,  x1,  x4     // Test AND: x9 = 10 & 10 = 10
+or    x10, x1,  x2     // Test OR:  x10 = 10 | 20 = 30
+xor   x11, x1,  x2     // Test XOR: x11 = 10 ^ 20 = 30

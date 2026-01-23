@@ -13,9 +13,11 @@ add_executable(Vcpu
 # SystemVerilog ソースを Verilator で C++ に変換
 verilate(Vcpu
     SOURCES
-        src/cpu_top.sv      # トップモジュール
+        src/cpu_pkg.sv      # CPUパッケージ（最初に配置）
+        src/decoder.sv      # デコードユニット
         src/instr_mem.sv    # 命令メモリ
         src/pc_reg.sv       # プログラムカウンタレジスタ
+        src/cpu_top.sv      # トップモジュール
     TOP_MODULE cpu_top      # トップモジュール名
     TRACE                   # 波形出力を有効化
     PREFIX Vcpu             # 生成されるC++クラスのプレフィックス
